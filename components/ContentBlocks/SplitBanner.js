@@ -2,7 +2,13 @@ import Image from "next/image";
 
 export default function SplitBanner({ fields }) {
   const file = fields.image?.fields?.asset?.fields?.file;
-  const imageUrl = file?.url?.startsWith("//") ? "https:" + file.url : file.url;
+
+  // Early return if image data is missing
+  if (!file?.url) {
+    return null; // Or render a fallback UI
+  }
+
+  const imageUrl = file.url.startsWith("//") ? "https:" + file.url : file.url;
 
   return (
     <section className="flex flex-col md:flex-row items-center gap-6 py-10 px-4 max-w-6xl mx-auto">
