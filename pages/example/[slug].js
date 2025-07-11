@@ -15,6 +15,7 @@ export default function Home({ pageData }) {
 
   return (
     <>
+      {" "}
       <Head>
         <meta
           httpEquiv="Cache-Control"
@@ -23,7 +24,6 @@ export default function Home({ pageData }) {
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
       </Head>
-
       <article className="m-auto w-full flex flex-col items-center justify-center mt-20">
         <h1 className="text-center text-5xl font-bold max-w-[570px]">
           {data.title}
@@ -45,4 +45,26 @@ export default function Home({ pageData }) {
       </article>
     </>
   );
+}
+
+export async function getStaticProps({ params }) {
+  console.log("Params = ", params);
+  const pageData = await client.getEntries({
+    content_type: "templateInnovationPage",
+    include: 10,
+    "fields.slug[match]": params.slug,
+  });
+
+  return { props: { pageData } };
+}
+
+export async function getStaticPaths() {
+  const pages = await client.getEntries({
+    content_type: "templateInnovationPage",
+  });
+
+  const paths = pages.items.map((page) => ({
+    params: { slug: page.fields.slug },
+  }));
+  return { paths, fallback: false };
 }
