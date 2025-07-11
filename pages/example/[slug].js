@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Head from "next/head";
 import { createClient } from "contentful";
 import { componentMap } from "@/components/ContentBlocks";
 
@@ -13,44 +14,35 @@ export default function Home({ pageData }) {
   const data = pageData.items[0].fields;
 
   return (
-    <article className="m-auto w-full flex flex-col items-center justify-center mt-20">
-      <h1 className="text-center text-5xl font-bold max-w-[570px]">
-        {data.title}
-      </h1>
+    <>
+      <Head>
+        <meta
+          httpEquiv="Cache-Control"
+          content="no-cache, no-store, must-revalidate"
+        />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
+      </Head>
 
-      {data.body.map((block, index) => {
-        const contentType = block.sys.contentType.sys.id;
-        const Component = componentMap[contentType];
+      <article className="m-auto w-full flex flex-col items-center justify-center mt-20">
+        <h1 className="text-center text-5xl font-bold max-w-[570px]">
+          {data.title}
+        </h1>
 
-        if (!Component) {
-          console.warn(`No component found for type: ${contentType}`);
-          return null;
-        }
+        {data.body.map((block, index) => {
+          const contentType = block.sys.contentType.sys.id;
+          const Component = componentMap[contentType];
 
-        return <Component key={block.sys.id || index} fields={block.fields} />;
-      })} 
-    </article>
+          if (!Component) {
+            console.warn(`No component found for type: ${contentType}`);
+            return null;
+          }
+
+          return (
+            <Component key={block.sys.id || index} fields={block.fields} />
+          );
+        })}
+      </article>
+    </>
   );
-}
-
-export async function getStaticProps({ params }) {
-  console.log("Params = ", params);
-  const pageData = await client.getEntries({
-    content_type: "templateInnovationPage",
-    include: 10,
-    "fields.slug[match]": params.slug,
-  });
-
-  return { props: { pageData } };
-}
-
-export async function getStaticPaths() {
-  const pages = await client.getEntries({
-    content_type: "templateInnovationPage",
-  });
-
-  const paths = pages.items.map((page) => ({
-    params: { slug: page.fields.slug },
-  }));
-  return { paths, fallback: false };
 }
